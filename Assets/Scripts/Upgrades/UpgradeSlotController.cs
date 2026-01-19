@@ -19,6 +19,8 @@ public class UpgradeSlotController : MonoBehaviour
             SetupMultiplier();
         if (upgradeType == 3)
             SetupSpeed();
+        if (upgradeType == 4)
+            SetupEngine();
     }
 
     // 1 - уже есть
@@ -62,6 +64,16 @@ public class UpgradeSlotController : MonoBehaviour
     {
         currentLevel.text = PlayerStatic.SpeedLevel.ToString();
         int costs = UpgradesController.GetCost(3);
+        if (costs == -1)
+            cost.text = "Max";
+        else
+            cost.text = costs.ToString();
+    }
+
+    private void SetupEngine()
+    {
+        currentLevel.text = PlayerStatic.EngineLevel.ToString();
+        int costs = UpgradesController.GetCost(4);
         if (costs == -1)
             cost.text = "Max";
         else

@@ -13,8 +13,10 @@ public class UpgradesController : MonoBehaviour
     [SerializeField] private int[] smoothnessCost;
     [SerializeField] private int[] multiplierCost;
     [SerializeField] private int[] speedCosts;
+    [SerializeField] private int[] engineCosts;
     [SerializeField] private UpgradeSlotController[] slots;
     private readonly string[] names = new string[4] {"Viscosity Resistance", "Smoothness Resistance", "Loot Multiplier", "Speed"};
+    private const int UpgradesCount = 5;
 
     private bool isOpened = false;
     private PlayerInput playerInput;
@@ -33,21 +35,14 @@ public class UpgradesController : MonoBehaviour
         if (cheepestValue < 0)
             cheepestValue = 1000000000;
         int cheepestIndex = 0;
-        
-        if (cheepestValue > GetCost(1) && GetCost(1) > 0)
+
+        for (int i = 1; i < UpgradesCount; i++)
         {
-            cheepestValue = GetCost(1);
-            cheepestIndex = 1;
-        }
-        if (cheepestValue > GetCost(2) && GetCost(2) > 0)
-        {
-            cheepestValue = GetCost(2);
-            cheepestIndex = 2;
-        }
-        if (cheepestValue > GetCost(3) && GetCost(3) > 0)
-        {
-            cheepestValue = GetCost(3);
-            cheepestIndex = 3;
+            if (cheepestValue > GetCost(i) && GetCost(i) > 0)
+            {
+                cheepestValue = GetCost(i);
+                cheepestIndex = i;
+            }
         }
 
         if (PlayerStatic.Money >= cheepestValue)
@@ -73,8 +68,11 @@ public class UpgradesController : MonoBehaviour
 
     private void OnButtonPressed(InputAction.CallbackContext ctx)
     {
+        if (Time.timeScale == 0 && !isOpened)
+            return;
         isOpened = !isOpened;
         upgradesPanel.SetActive(isOpened);
+        Time.timeScale = isOpened ? 0 : 1;
         money.text = PlayerStatic.Money.ToString();
         FindBestUpgrade();
         GemsFinder.ChangePlayerState(!isOpened);
@@ -106,6 +104,12 @@ public class UpgradesController : MonoBehaviour
             Buy(speedCosts[PlayerStatic.SpeedLevel - 1]);
             PlayerStatic.SpeedLevel++;
         }
+        if (type == 4 && PlayerStatic.Money >= engineCosts[PlayerStatic.EngineLevel - 1])
+        {
+            Buy(engineCosts[PlayerStatic.EngineLevel - 1]);
+            PlayerStatic.EngineLevel++;
+        }
+
         slots[type].UpdateData();
         FindBestUpgrade();
     }
@@ -129,6 +133,8 @@ public class UpgradesController : MonoBehaviour
             return instance.multiplierCost[PlayerStatic.LootMultiplierLevel - 1];
         if (type == 3 && PlayerStatic.SpeedLevel <= instance.speedCosts.Length)
             return instance.speedCosts[PlayerStatic.SpeedLevel - 1];
+        if (type == 4 && PlayerStatic.EngineLevel <= instance.engineCosts.Length)
+            return instance.engineCosts[PlayerStatic.EngineLevel - 1];
         return -1;
     }
 }
